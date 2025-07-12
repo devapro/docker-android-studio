@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  android_studio:
+    image: devapro/android-studio
+    build: .
+    ports:
+      - "80:6080"
+      - "5901:5901"
+      - "4040:4040"
+    privileged: true
+    volumes:
+      - ./studio-data/Android:/home/ubuntu//Android
+      - ./studio-data/profile/.android:/home/ubuntu/.android
+      - ./studio-data/profile/.java:/home/ubuntu/.java
+      - ./studio-data/profile/.gradle:/home/ubuntu/.gradle
+      - ./studio-data/profile/.config:/home/ubuntu/.config
+      - ./studio-data/profile/.cache:/home/ubuntu/.cache
+      - ./studio-data/Projects:/home/ubuntu/Projects

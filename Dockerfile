@@ -52,7 +52,9 @@ RUN apt update && apt install -y \
 RUN wget -q "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US" -O /tmp/firefox.tar.xz \
     && tar -xvf /tmp/firefox.tar.xz -C /opt/ \
     && rm /tmp/firefox.tar.xz \
-    && chown -R $USER:$USER /opt/firefox
+    && chown -R $USER:$USER /opt/firefox/firefox
+RUN echo '#!/bin/bash\n/opt/firefox/firefox' > /usr/local/bin/firefox \
+&& chmod +x /usr/local/bin/firefox
 
 # Download and install Android Studio
 RUN wget -q https://redirector.gvt1.com/edgedl/android/studio/ide-zips/$ANDROID_STUDIO_VERSION/android-studio-$ANDROID_STUDIO_VERSION-linux.tar.gz -O /tmp/android-studio.tar.gz \
@@ -92,11 +94,7 @@ COPY supervisor.conf /etc/supervisor/conf.d/
 # Copy startup script
 COPY startup.sh $HOME
 
-RUN ln -s /studio-data/profile/AndroidStudio$ANDROID_STUDIO_VERSION .AndroidStudio$ANDROID_STUDIO_VERSION
-RUN ln -s /studio-data/Android Android
-RUN ln -s /studio-data/profile/android .android
-RUN ln -s /studio-data/profile/java .java
-RUN ln -s /studio-data/profile/gradle .gradle
+RUN mkdir -p $HOME/Projects
 
 EXPOSE 6080 5901 4040
 CMD ["/bin/bash", "/home/ubuntu/startup.sh"]
