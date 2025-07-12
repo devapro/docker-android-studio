@@ -13,10 +13,10 @@ RUN echo "$USER:$PASSWORD" | chpasswd
 RUN usermod -aG sudo $USER
 
 # Install Ubuntu Unity.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        lubuntu-desktop \
-        sudo
+RUN apt update
+RUN apt-get install -y --no-install-recommends sudo
+RUN apt-get install -y --no-install-recommends lxde
+#RUN apt-get install -y --no-install-recommends ubuntu-gnome-desktop
 
 # Download tigerVNC binaries
 RUN apt install -y tigervnc-standalone-server tigervnc-xorg-extension
@@ -33,6 +33,12 @@ RUN apt-get install -y \
         wget \
     && apt-get autoclean \
     && apt-get autoremove 
+
+RUN apt install -y gpg-agent \
+    && curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && (dpkg -i ./google-chrome-stable_current_amd64.deb || apt-get install -fy) \
+    && curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add \
+    && rm google-chrome-stable_current_amd64.deb
 
 RUN su $USER -c "mkdir -p $HOME/.vnc && echo '$PASSWORD' | vncpasswd -f > $HOME/.vnc/passwd && chmod 600 $HOME/.vnc/passwd"
 RUN chown -R $USER:$USER $HOME
