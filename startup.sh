@@ -8,29 +8,29 @@ if [ ! -f $HOME/.vnc/passwd ] ; then
     # fi
     PASSWORD="123456"
 
-    echo "$USER:$PASSWORD" | chpasswd
+    # echo "$USER:$PASSWORD" | chpasswd
 
-    usermod -aG sudo $USER
+    # usermod -aG sudo $USER
 
-    # Set up vncserver
-    su $USER -c "mkdir -p $HOME/.vnc && echo '$PASSWORD' | vncpasswd -f > $HOME/.vnc/passwd && chmod 600 $HOME/.vnc/passwd"
+    # # Set up vncserver
+    # su $USER -c "mkdir -p $HOME/.vnc && echo '$PASSWORD' | vncpasswd -f > $HOME/.vnc/passwd && chmod 600 $HOME/.vnc/passwd"
 
-    chown -R $USER:$USER $HOME
+    # chown -R $USER:$USER $HOME
 
-    if [ ! -z "$SUDO" ]; then
-        case "$SUDO" in
-            [yY]|[yY][eE][sS])
-                adduser $USER sudo
-        esac
-    fi
+    # if [ ! -z "$SUDO" ]; then
+    #     case "$SUDO" in
+    #         [yY]|[yY][eE][sS])
+    #             adduser $USER sudo
+    #     esac
+    # fi
 
 else
 
     VNC_PID=`find $HOME/.vnc -name '*.pid'`
-    if [ ! -z "$VNC_PID" ] ; then
-        vncserver -kill :1
-        rm -rf /tmp/.X1*
-    fi
+    # if [ ! -z "$VNC_PID" ] ; then
+    #     vncserver -kill :1
+    #     rm -rf /tmp/.X1*
+    # fi
 
 fi
 

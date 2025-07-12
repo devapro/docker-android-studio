@@ -3,16 +3,20 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND noninteractive
 ENV USER ubuntu
 ENV HOME /home/$USER
+ENV PASSWORD 123456
 
 # Create new user for vnc login.
 RUN adduser $USER --disabled-password
+
+RUN echo "$USER:$PASSWORD" | chpasswd
+
+RUN usermod -aG sudo $USER
 
 # Install Ubuntu Unity.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         lubuntu-desktop \
-        sudo \
-        nano
+        sudo
 
 # Download tigerVNC binaries
 RUN apt install -y tigervnc-standalone-server tigervnc-xorg-extension
@@ -23,9 +27,15 @@ RUN apt-get install -y \
         net-tools \
         curl \
         git \
+        nano \
+        mc \
+        htop \
+        wget \
     && apt-get autoclean \
     && apt-get autoremove 
 
+RUN su $USER -c "mkdir -p $HOME/.vnc && echo '$PASSWORD' | vncpasswd -f > $HOME/.vnc/passwd && chmod 600 $HOME/.vnc/passwd"
+RUN chown -R $USER:$USER $HOME
 
 # Clone noVNC.
 RUN git clone https://github.com/novnc/noVNC.git $HOME/noVNC
