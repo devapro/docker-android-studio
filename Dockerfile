@@ -1,12 +1,15 @@
 FROM ubuntu:22.04
+#FROM nvidia/cuda:12.3.1-base-ubuntu22.04
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV USER ubuntu
 ENV HOME /home/$USER
 ENV PASSWORD 123456
+ENV ANDROID_STUDIO_VERSION=2025.1.1.14
 
 # Create new user for vnc login.
-RUN adduser $USER --disabled-password
+RUN groupadd -g 1000 -r $USER
+RUN useradd -u 1000 -g 1000 --create-home -r $USER
 
 RUN echo "$USER:$PASSWORD" | chpasswd
 
@@ -16,7 +19,7 @@ RUN usermod -aG sudo $USER
 RUN apt update
 RUN apt-get install -y --no-install-recommends sudo
 RUN apt-get install -y --no-install-recommends lxde
-#RUN apt-get install -y --no-install-recommends ubuntu-gnome-desktop
+#RUN apt-get install -y --no-install-recommends lubuntu-desktop
 
 # Download tigerVNC binaries
 RUN apt install -y tigervnc-standalone-server tigervnc-xorg-extension
@@ -30,15 +33,44 @@ RUN apt-get install -y \
         nano \
         mc \
         htop \
-        wget \
-    && apt-get autoclean \
-    && apt-get autoremove 
+        wget
 
-RUN apt install -y gpg-agent \
-    && curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && (dpkg -i ./google-chrome-stable_current_amd64.deb || apt-get install -fy) \
-    && curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add \
-    && rm google-chrome-stable_current_amd64.deb
+RUN apt-get install -y libxrender1 libxtst6 libxi6
+
+# TODO review/remove
+RUN apt update && apt install -y \
+	unzip bzip2 libdrm-dev \
+	libxkbcommon-dev libgbm-dev libasound-dev libnss3 \
+	libxcursor1 libpulse-dev libxshmfence-dev \
+	xauth xvfb fluxbox wmctrl libdbus-glib-1-2 socat \
+	virt-manager
+
+# Install OpenJDK for Android Studio
+#RUN apt-get install -y openjdk-11-jdk
+
+# Download and install Firefox
+RUN wget -q "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US" -O /tmp/firefox.tar.xz \
+    && tar -xvf /tmp/firefox.tar.xz -C /opt/ \
+    && rm /tmp/firefox.tar.xz \
+    && chown -R $USER:$USER /opt/firefox
+
+# Download and install Android Studio
+RUN wget -q https://redirector.gvt1.com/edgedl/android/studio/ide-zips/$ANDROID_STUDIO_VERSION/android-studio-$ANDROID_STUDIO_VERSION-linux.tar.gz -O /tmp/android-studio.tar.gz \
+    && tar -xzf /tmp/android-studio.tar.gz -C /opt/ \
+    && rm /tmp/android-studio.tar.gz \
+    && chown -R $USER:$USER /opt/android-studio
+
+# Create Android Studio wrapper script
+RUN echo '#!/bin/bash\nexport JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64\nexport ANDROID_HOME=$HOME/Android/Sdk\nexport PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools\ncd /opt/android-studio/bin\n./studio.sh "$@"' > /usr/local/bin/android-studio \
+    && chmod +x /usr/local/bin/android-studio
+
+# KVM
+RUN apt install -y qemu qemu-kvm
+RUN adduser $USER kvm
+
+# Create Android SDK directory and set permissions
+RUN su $USER -c "mkdir -p $HOME/Android/Sdk" \
+    && chown -R $USER:$USER $HOME/Android
 
 RUN su $USER -c "mkdir -p $HOME/.vnc && echo '$PASSWORD' | vncpasswd -f > $HOME/.vnc/passwd && chmod 600 $HOME/.vnc/passwd"
 RUN chown -R $USER:$USER $HOME
@@ -60,10 +92,11 @@ COPY supervisor.conf /etc/supervisor/conf.d/
 # Copy startup script
 COPY startup.sh $HOME
 
-# Set xsession of Unity
-#COPY xsession $HOME/.xsession
-
-
+RUN ln -s /studio-data/profile/AndroidStudio$ANDROID_STUDIO_VERSION .AndroidStudio$ANDROID_STUDIO_VERSION
+RUN ln -s /studio-data/Android Android
+RUN ln -s /studio-data/profile/android .android
+RUN ln -s /studio-data/profile/java .java
+RUN ln -s /studio-data/profile/gradle .gradle
 
 EXPOSE 6080 5901 4040
 CMD ["/bin/bash", "/home/ubuntu/startup.sh"]

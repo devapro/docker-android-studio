@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "`whoami`" | sudo -S chmod 777 /dev/kvm > /dev/null 2>&1
+
 if [ ! -f $HOME/.vnc/passwd ] ; then
 
     # if  [ -z "$PASSWORD" ] ; then
