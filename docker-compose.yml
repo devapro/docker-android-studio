@@ -16,4 +16,4 @@ services:
       - ./studio-data/profile/.gradle:/home/ubuntu/.gradle
       - ./studio-data/profile/.config:/home/ubuntu/.config
       - ./studio-data/profile/.cache:/home/ubuntu/.cache
-      - ./studio-data/Projects:/home/ubuntu/Projects
+      - /home/auser/Projects/Android:/home/ubuntu/Projects

@@ -2,23 +2,27 @@
 
 The goal of this project is to create a simple solution to run Android Studion and emulator in browser on any devices.
 
-Simple deploy:
+#### Quick start:
 
-`docker-compose up --build`
+1. In docker-compose.yml replace in line `/home/auser/Projects/Android` with folder to your Android projects
 
-Folders mapping:
+2. Run script that create required folders
+
+`/bin/bash run.sh`
+
+3. Open http://127.0.0.1
+4. Enter password `123456`
+5. Open terminal and type `android-studio` 
+
+#### Folders mapping:
 
 - data/profile - folders with configs and cache
 - data/Project - folder for AS projects
 
-Included:
+#### Included:
 - Android studio
 - Firefox
 - noVnc
 
-Run (creates required folders):
-
-`/bin/bash run.sh`
-
-Known issues:
+#### Known issues:
 - emulator doesn't work in Devices tool window
